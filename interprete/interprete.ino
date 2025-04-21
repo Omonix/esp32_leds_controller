@@ -1,18 +1,18 @@
-using namespace std;
-#include "BluetoothSerial.h";
-#include <FastLED.h>;
-#include <string>;
+#include "BluetoothSerial.h"
+#include <FastLED.h>
+#include <iterator>
+#include <list>
 #define NUM_LEDS 300
 #define DATA_PIN 4
-int to_do = 0;
-bool actived = false;
-int brightness = 0;
-int color1 = 0<<16 | 128<<8 | 128;
-int color2 = 255<<16 | 50<<8 | 140;
 
 CRGB leds[NUM_LEDS];
 BluetoothSerial SerialBT;
 const int ledPin = 2;
+int to_do = 0;
+bool actived = false;
+int brightness = 5;
+int color1 = 204<<16 | 0<<8 | 0;
+int color2 = 203<<16 | 21<<8 | 194;
 
 void lb_reset() {
   to_do = 0;
@@ -62,13 +62,13 @@ void lb_color_fade(int color1, int color2, int space) {
   for (int i = 0; i < brightness; i++) {
     FastLED.setBrightness(i);
     FastLED.show();
-    delay(40);
+    delay(80);
   }
   delay(space);
   for (int i = brightness; i > 0; i--) {
     FastLED.setBrightness(i);
     FastLED.show();
-    delay(40);
+    delay(80);
   }
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = CRGB(the_color2[0], the_color2[1], the_color2[2]);
@@ -77,13 +77,13 @@ void lb_color_fade(int color1, int color2, int space) {
   for (int i = 0; i < brightness; i++) {
     FastLED.setBrightness(i);
     FastLED.show();
-    delay(40);
+    delay(80);
   }
   delay(space);
   for (int i = brightness; i > 0; i--) {
     FastLED.setBrightness(i);
     FastLED.show();
-    delay(40);
+    delay(80);
   }
   to_do = 4;
 }
@@ -130,25 +130,44 @@ void setup() {
   SerialBT.begin("LEDs Lydka");
   pinMode(ledPin, OUTPUT);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.setBrightness(brightness);
 }
-
 void loop() {
+  std::list<int> data;
+  std::list<int>::iterator it;
   if (SerialBT.available()) {
-    FastLED.setBrightness(1);
-    brightness = 1;
-    char info = SerialBT.read();
-    //std::string info = "1";
-    if (info == '1') {
-      digitalWrite(ledPin, HIGH);
-      to_do = 5;
-      actived = true;
-    } else if (info == '0') {
-      digitalWrite(ledPin, LOW);
-      lb_reset();
-      actived = false;
+    while (SerialBT.available()) {
+      data.push_back(SerialBT.read());
     }
+    it = data.begin();
+    int i = 0;
+    int color1r = 0;
+    int color1g = 0;
+    int color1b = 0;
+    int color2r = 0;
+    int color2g = 0;
+    int color2b = 0;
+    while (it != data.end()) {
+      if (i == 0) {
+        actived = (bool)*it;
+        if (!actived) break;
+      } else if (i == 1) to_do = *it;
+      else if (i == 2) {
+        brightness = *it;
+        FastLED.setBrightness(brightness);
+      } else if (i == 3) color1r = *it;
+      else if (i == 4) color1g = *it;
+      else if (i == 5) color1b = *it;
+      else if (i == 6) color2r = *it;
+      else if (i == 7) color2g = *it;
+      else if (i == 8) color2b = *it;
+      it++;
+      i++;
+    }
+    color1 = color1r<<16 | color1g<<8 | color1b;
+    color2 = color2r<<16 | color2g<<8 | color2b;
   }
-  if (actived == true) {
+  if (actived) {
     if (to_do == 1) {
       lb_all_leds(color1);
     } else if (to_do == 2) {
@@ -161,5 +180,7 @@ void loop() {
     } else if (to_do == 5) {
       lb_snake(color1);
     }
+  } else {
+    lb_reset();
   }
 }
