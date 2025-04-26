@@ -121,6 +121,7 @@ void lb_snake(int color) {
   }
   delay(10000);
   lb_all_leds(0);
+  to_do = 5;
 }
 int lb_get_rgb(int color, int rank) {
   return (color>>rank) & 0xFF;
