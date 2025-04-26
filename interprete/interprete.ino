@@ -11,8 +11,9 @@ const int ledPin = 2;
 int to_do = 0;
 bool actived = false;
 int brightness = 5;
-int color1 = 204<<16 | 0<<8 | 0;
-int color2 = 203<<16 | 21<<8 | 194;
+int color1 = 0;
+int color2 = 0;
+int under_space = 0;
 
 void lb_reset() {
   to_do = 0;
@@ -87,7 +88,7 @@ void lb_color_fade(int color1, int color2, int space) {
   }
   to_do = 4;
 }
-void lb_snake(int color) {
+void lb_snake(int color, int space) {
   int the_color[3] = {lb_get_rgb(color, 16), lb_get_rgb(color, 8), lb_get_rgb(color, 0)};
   for (int i = NUM_LEDS; i > 0; i--) {
     if (i % 10 == 0) {
@@ -119,7 +120,7 @@ void lb_snake(int color) {
     }
     delay(1000 / i * 2);
   }
-  delay(10000);
+  delay(space);
   lb_all_leds(0);
   to_do = 5;
 }
@@ -162,6 +163,7 @@ void loop() {
       else if (i == 6) color2r = *it;
       else if (i == 7) color2g = *it;
       else if (i == 8) color2b = *it;
+      else if (i == 9) under_space = *it * 1000;
       it++;
       i++;
     }
@@ -172,14 +174,14 @@ void loop() {
     if (to_do == 1) {
       lb_all_leds(color1);
     } else if (to_do == 2) {
-      lb_two_colors(color1, color2, 10000);
+      lb_two_colors(color1, color2, under_space);
     } else if (to_do == 3) {
       lb_peer(color1, color2);
       to_do = 0;
     } else if (to_do == 4) {
-      lb_color_fade(color1, color2, 5000);
+      lb_color_fade(color1, color2, under_space);
     } else if (to_do == 5) {
-      lb_snake(color1);
+      lb_snake(color1, under_space);
     }
   } else {
     lb_reset();
