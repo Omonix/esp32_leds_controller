@@ -1,5 +1,6 @@
 #include "BluetoothSerial.h"
 #include <FastLED.h>
+#include <math.h>
 #include <iterator>
 #include <list>
 #define NUM_LEDS 300
@@ -155,7 +156,8 @@ void loop() {
         if (!actived) break;
       } else if (i == 1) to_do = *it;
       else if (i == 2) {
-        brightness = *it;
+        brightness = floor(*it * 255 / 100);
+        if (brightness == 0) brightness++;
         FastLED.setBrightness(brightness);
       } else if (i == 3) color1r = *it;
       else if (i == 4) color1g = *it;
