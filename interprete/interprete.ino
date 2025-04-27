@@ -16,10 +16,11 @@ int color1 = 0;
 int color2 = 0;
 int under_space = 0;
 
-void lb_reset() {
+void lb_reset(int color) {
+  int the_color[3] = {lb_get_rgb(color, 16), lb_get_rgb(color, 8), lb_get_rgb(color, 0)};
   to_do = 0;
   for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(0, 0, 0);
+    leds[i] = CRGB(the_color[0], the_color[1], the_color[2]);
   }
   FastLED.show();
 }
@@ -57,10 +58,7 @@ void lb_color_fade(int color1, int color2, int space) {
   int the_color1[3] = {lb_get_rgb(color1, 16), lb_get_rgb(color1, 8), lb_get_rgb(color1, 0)};
   int the_color2[3] = {lb_get_rgb(color2, 16), lb_get_rgb(color2, 8), lb_get_rgb(color2, 0)};
   FastLED.setBrightness(0);
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(the_color1[0], the_color1[1], the_color1[2]);
-  }
-  FastLED.show();
+  lb_reset(color1);
   for (int i = 0; i < brightness; i++) {
     FastLED.setBrightness(i);
     FastLED.show();
@@ -72,10 +70,7 @@ void lb_color_fade(int color1, int color2, int space) {
     FastLED.show();
     delay(80);
   }
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(the_color2[0], the_color2[1], the_color2[2]);
-  }
-  FastLED.show();
+  lb_reset(color2);
   for (int i = 0; i < brightness; i++) {
     FastLED.setBrightness(i);
     FastLED.show();
@@ -186,6 +181,6 @@ void loop() {
       lb_snake(color1, under_space);
     }
   } else {
-    lb_reset();
+    lb_reset(0);
   }
 }
