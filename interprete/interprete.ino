@@ -120,6 +120,34 @@ void lb_snake(int color, int space) {
   lb_all_leds(0);
   to_do = 5;
 }
+void lb_unicorn() {
+  std::vector<int> vec_color;
+  vec_color.reserve(6);
+  std::vector<int>::iterator it_color;
+  vec_color.emplace_back(255<<16 | 0<<8 | 0);
+  vec_color.emplace_back(255<<16 | 42<<8 | 0);
+  vec_color.emplace_back(255<<16 | 174<<8 | 0);
+  vec_color.emplace_back(42<<16 | 255<<8 | 0);
+  vec_color.emplace_back(21<<16 | 0<<8 | 255);
+  vec_color.emplace_back(160<<16 | 0<<8 | 192);
+  for (int x = 0; x < vec_color.size(); x++) {
+    it_color = vec_color.begin() - 1;
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB(lb_get_rgb(*it_color, 16), lb_get_rgb(*it_color, 8), lb_get_rgb(*it_color, 0));
+      FastLED.show();
+      if (i % 50 == 0) {
+        if (it_color != vec_color.end()) {
+          it_color++;
+        } else {
+          it_color = vec_color.begin() - 1;
+        }
+      }
+      delay(10);
+    }
+    vec_color.emplace(vec_color.begin(), *(vec_color.begin() + 5));
+    vec_color.pop_back();
+  }
+}
 int lb_get_rgb(int color, int rank) {
   return (color>>rank) & 0xFF;
 }
@@ -179,6 +207,8 @@ void loop() {
       lb_color_fade(color1, color2, under_space);
     } else if (to_do == 5) {
       lb_snake(color1, under_space);
+    } else if (to_do == 6) {
+      lb_unicorn();
     }
   } else {
     lb_reset(0);
